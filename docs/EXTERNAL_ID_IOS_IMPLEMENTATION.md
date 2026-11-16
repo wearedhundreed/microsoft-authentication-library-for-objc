@@ -27,7 +27,7 @@ External ID tenant-specific values are intentionally placeholders in this reposi
 
 ## 3. Browser-delegated MSAL configuration
 
-Use the tenant-specific authority supplied for the External ID customer tenant. For a CIAM tenant, the authority host commonly uses the tenant's `<tenant-subdomain>.ciamlogin.com` domain and the tenant-specific path documented for that tenant. Copy the exact authority from the tenant's app registration/quickstart; do not guess the tenant subdomain, tenant ID, policy, or authority path.
+Use the tenant-specific authority supplied for the External ID customer tenant. For an External ID customer tenant, use the authority host `https://<tenant-subdomain>.ciamlogin.com/`. Microsoft documents this tenant-name host as the authority format for external tenants. The tenant-specific OpenID Connect metadata endpoint is published below the tenant ID path; do not append that metadata path to the MSAL authority unless the generated platform quickstart explicitly instructs you to. Copy the exact authority from the tenant's app registration/quickstart; do not guess the tenant subdomain.
 
 Objective-C configuration outline:
 
@@ -35,7 +35,7 @@ Objective-C configuration outline:
 #import <MSAL/MSAL.h>
 
 NSString *clientId = @"<EXTERNAL_ID_APPLICATION_CLIENT_ID>";
-NSString *authorityURL = @"https://<TENANT_SUBDOMAIN>.ciamlogin.com/<TENANT_ID>";
+NSString *authorityURL = @"https://<TENANT_SUBDOMAIN>.ciamlogin.com/";
 
 NSError *configurationError = nil;
 MSALAuthority *authority =
@@ -62,7 +62,7 @@ if (applicationError || !application) {
 }
 ```
 
-The authority string above is a template, not a deployable tenant value. Confirm its exact format against the External ID tenant's generated quickstart before shipping.
+The authority string above is a template, not a deployable tenant value. Confirm it against the External ID tenant's generated quickstart before shipping. The tenant's OpenID Connect discovery document can be inspected at `https://<TENANT_SUBDOMAIN>.ciamlogin.com/<TENANT_ID>/v2.0/.well-known/openid-configuration` to verify issuer and endpoints.
 
 ## 4. Interactive sign-in and token acquisition
 
