@@ -52,3 +52,65 @@ jobs:
 
       - name: Enumerate Xcode schemes
         run: xcodebuild -list -project MSAL/MSAL.xcodeproj
+
+  apple-build-and-unit-tests:
+    name: Apple platform builds and unit tests
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - name: Check out source and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Show Xcode version and available destinations
+        run: |
+          xcodebuild -version
+          xcrun simctl list devices available
+
+      - name: Build iOS static library
+        run: |
+          xcodebuild build \
+            -project MSAL/MSAL.xcodeproj \
+            -scheme "MSAL (iOS Static Library)" \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Build macOS static library
+        run: |
+          xcodebuild build \
+            -project MSAL/MSAL.xcodeproj \
+            -scheme "MSAL (Mac Static Library)" \
+            -destination 'generic/platform=macOS' \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Run iOS framework unit tests
+        run: |
+          xcodebuild test \
+            -project MSAL/MSAL.xcodeproj \
+            -scheme "MSAL (iOS Framework)" \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -parallel-testing-enabled NO \
+            -resultBundlePath "$RUNNER_TEMP/MSAL-iOS.xcresult" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Run macOS framework unit tests
+        run: |
+          xcodebuild test \
+            -project MSAL/MSAL.xcodeproj \
+            -scheme "MSAL (Mac Framework)" \
+            -destination 'platform=macOS' \
+            -parallel-testing-enabled NO \
+            -resultBundlePath "$RUNNER_TEMP/MSAL-macOS.xcresult" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload Xcode test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apple-sdk-xcode-test-results
+          path: |
+            ${{ runner.temp }}/MSAL-iOS.xcresult
+            ${{ runner.temp }}/MSAL-macOS.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
