@@ -1,0 +1,30 @@
+name: iOS Framework Validation
+
+on:
+  pull_request:
+    branches:
+      - dev
+    paths:
+      - 'MSAL/**'
+      - 'MSAL.xcworkspace/**'
+      - 'build.py'
+      - 'device_guids.py'
+      - '.github/workflows/ios-framework.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ios-framework:
+    name: Build and test iOS framework
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - name: Check out repository and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build and test iOS framework
+        run: ./build.py --no-xcpretty --targets iosFramework
