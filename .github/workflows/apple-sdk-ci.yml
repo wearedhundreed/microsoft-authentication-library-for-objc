@@ -92,7 +92,9 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
             -parallel-testing-enabled NO \
             -resultBundlePath "$RUNNER_TEMP/MSAL-iOS.xcresult" \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=YES \
+            CODE_SIGNING_REQUIRED=YES \
+            CODE_SIGN_IDENTITY=-
 
       - name: Run macOS framework unit tests
         if: always()
