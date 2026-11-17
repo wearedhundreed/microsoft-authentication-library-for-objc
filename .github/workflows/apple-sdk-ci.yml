@@ -70,39 +70,39 @@ jobs:
 
       - name: Build iOS static library
         run: |
-          xcodebuild build \\
-            -project MSAL/MSAL.xcodeproj \\
-            -scheme "MSAL (iOS Static Library)" \\
-            -destination 'generic/platform=iOS Simulator' \\
+          xcodebuild build \
+            -project MSAL/MSAL.xcodeproj \
+            -scheme "MSAL (iOS Static Library)" \
+            -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO
 
       - name: Build macOS static library
         run: |
-          xcodebuild build \\
-            -project MSAL/MSAL.xcodeproj \\
-            -scheme "MSAL (Mac Static Library)" \\
-            -destination 'generic/platform=macOS' \\
+          xcodebuild build \
+            -project MSAL/MSAL.xcodeproj \
+            -scheme "MSAL (Mac Static Library)" \
+            -destination 'generic/platform=macOS' \
             CODE_SIGNING_ALLOWED=NO
 
       - name: Run iOS framework unit tests
         run: |
-          xcodebuild test \\
-            -project MSAL/MSAL.xcodeproj \\
-            -scheme "MSAL (iOS Framework)" \\
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \\
-            -parallel-testing-enabled NO \\
-            -resultBundlePath "$RUNNER_TEMP/MSAL-iOS.xcresult" \\
+          xcodebuild test \
+            -project MSAL/MSAL.xcodeproj \
+            -scheme "MSAL (iOS Framework)" \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -parallel-testing-enabled NO \
+            -resultBundlePath "$RUNNER_TEMP/MSAL-iOS.xcresult" \
             CODE_SIGNING_ALLOWED=NO
 
       - name: Run macOS framework unit tests
         if: always()
         run: |
-          xcodebuild test \\
-            -project MSAL/MSAL.xcodeproj \\
-            -scheme "MSAL (Mac Framework)" \\
-            -destination 'platform=macOS' \\
-            -parallel-testing-enabled NO \\
-            -resultBundlePath "$RUNNER_TEMP/MSAL-macOS.xcresult" \\
+          xcodebuild test \
+            -project MSAL/MSAL.xcodeproj \
+            -scheme "MSAL (Mac Framework)" \
+            -destination 'platform=macOS' \
+            -parallel-testing-enabled NO \
+            -resultBundlePath "$RUNNER_TEMP/MSAL-macOS.xcresult" \
             CODE_SIGNING_ALLOWED=NO
 
       - name: Upload Xcode test results
