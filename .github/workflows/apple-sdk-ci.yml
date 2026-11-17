@@ -97,7 +97,7 @@ jobs:
             -resultBundlePath "$RUNNER_TEMP/MSAL-iOS.xcresult" \
             -derivedDataPath "$RUNNER_TEMP/DerivedData-ios-tests" \
             CODE_SIGNING_ALLOWED=YES \
-            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_REQUIRED=YES \
             CODE_SIGN_IDENTITY=-
 
       - name: Run macOS framework unit tests
