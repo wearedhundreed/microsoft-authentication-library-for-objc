@@ -65,7 +65,7 @@ static NSString * const SampleExternalIDScopesKey = @"ExternalIDScopes";
     BOOL validRedirect = redirectURL &&
         [redirectURL.scheme.lowercaseString isEqualToString:@"msauth"] &&
         redirectURL.host.length > 0 &&
-        [redirectURL.path.lowercaseString isEqualToString:@"/auth"] &&
+        (redirectURL.path.length == 0 || [redirectURL.path.lowercaseString isEqualToString:@"/auth"]) &&
         [self isMSALResponseURL:redirectURL registeredURLSchemes:registeredURLSchemes];
     BOOL validScopes = [scopes isKindOfClass:NSArray.class] && scopes.count > 0;
     if ([scopes isKindOfClass:NSArray.class])
