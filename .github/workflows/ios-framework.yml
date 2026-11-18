@@ -21,6 +21,9 @@ jobs:
     name: Build and test iOS framework
     runs-on: macos-26
     timeout-minutes: 60
+    env:
+      IOS_SIM_DEVICE: iPhone 17
+      IOS_SIM_OS: "26.2"
     steps:
       - name: Check out repository and submodules
         uses: actions/checkout@v4
