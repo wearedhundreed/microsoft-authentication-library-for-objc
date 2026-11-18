@@ -1,6 +1,6 @@
 # Microsoft Entra External ID browser-delegated sign-in (iOS / Objective-C)
 
-This guide adds a browser-delegated Microsoft Entra External ID configuration to the existing MSAL iOS sample. It uses the existing public-client APIs in this repository. It does **not** add a new OAuth implementation or change MSAL protocol internals.
+The Objective-C sample now has a second, independent Microsoft Entra External ID browser sign-in path. The existing workforce client ID, account key, and sign-in path remain in place. Both flows use MSAL public-client APIs; the sample does not implement a parallel OAuth flow.
 
 ## Scope and security model
 
@@ -33,11 +33,13 @@ Required values:
 
 The client ID, authority, redirect URI, and scopes are configuration, not secrets. Never add client secrets, passwords, tokens, authorization codes, or private keys to the app or repository.
 
-## 2. Configure the sample app
+## 2. Configure the Objective-C sample app
 
-For a local test, put the values in the sample app's build configuration or local Info.plist. Do not commit tenant-specific identifiers unless the repository owner explicitly intends to publish that sample configuration.
+The Objective-C sample reads `ExternalIDClientId`, `ExternalIDAuthority`, and `ExternalIDScopes` from its Info.plist. The committed values are safe placeholders and intentionally prevent sign-in until configured. For a local test, replace them in a local build configuration or Info.plist with the application (client) ID, `https://<tenant-subdomain>.ciamlogin.com/`, and at least one delegated scope exposed by the API. Keep tenant-specific values out of commits.
 
-The sample must register the URL scheme associated with the exact redirect URI in the app target's URL Types. Keep the existing URL types and callback handling intact; add the External ID scheme rather than replacing unrelated schemes.
+The sample reads its bundle identifier from the built app and derives the default redirect URI as `msauth.<bundle-id>://auth`. The existing URL type now expands the same bundle identifier, preserving the workforce scheme while registering the External ID callback. If your tenant registration supplies a different redirect URI, set `ExternalIDRedirectUri` in the app configuration and register its scheme. The sample validates HTTPS authority, the CIAM host, a configured client ID, nonempty scopes, and a registered `auth` callback before creating the External ID MSAL client.
+
+The login view has separate workforce and External ID buttons. External ID stores its account identifier under its own key, uses the configured scopes for silent acquisition, and starts an interactive request only for `MSALErrorInteractionRequired`. The UI suppresses the expected user-cancelled error. External ID sign-out removes that account from this client's MSAL cache; it does not claim to terminate every system-browser SSO session.
 
 ## 3. Initialize MSAL with the External ID authority
 
@@ -193,6 +195,6 @@ Use MSAL's account removal/sign-out APIs for the selected account and configured
 
 ## 9. Boundaries and known prerequisites
 
-This repository change documents the browser-delegated integration path; it does not verify a live tenant. Live validation requires a real External ID customer tenant, app registration, bundle identifier, redirect URI, user flow, test customer, and API scope. Do not mark tenant authentication as verified until those tests have been run.
+Objective-C XCTest cases exercise fail-closed configuration validation, bundle-derived redirects, unregistered schemes, and callback routing boundaries. The Apple CI workflow runs the MSAL iOS unit-test target and builds the Objective-C sample. Live validation requires a real External ID customer tenant, app registration, bundle identifier, redirect URI, user flow, test customer, and API scope. Do not mark tenant authentication as verified until those tests have been run.
 
 This integration does not add passkey/WebAuthn APIs to MSAL. Passkey support is configured and performed by the identity provider's hosted experience where supported. It also does not make MSAL's iOS interactive API a device-authorization API.

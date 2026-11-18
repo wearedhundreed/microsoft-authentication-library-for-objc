@@ -7,6 +7,7 @@ on:
     paths:
       - 'MSAL/**'
       - 'MSAL.xcworkspace/**'
+      - 'Samples/ios/SampleApp/**'
       - 'build.py'
       - 'device_guids.py'
       - '.github/workflows/ios-framework.yml'
@@ -28,3 +29,6 @@ jobs:
 
       - name: Build and test iOS framework
         run: ./build.py --no-xcpretty --targets iosFramework
+
+      - name: Build Objective-C iOS sample
+        run: ./build.py --no-xcpretty --targets sampleIosApp

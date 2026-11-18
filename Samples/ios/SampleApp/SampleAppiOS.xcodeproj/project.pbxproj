@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D611E3271E95A5CD00BA782C /* SampleMSALUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = D611E3261E95A5CD00BA782C /* SampleMSALUtil.m */; };
+		AA0000000000000000000011 /* SampleExternalIDConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000013 /* SampleExternalIDConfiguration.m */; };
 		D611E3311E95B22500BA782C /* SampleAppErrors.m in Sources */ = {isa = PBXBuildFile; fileRef = D611E3301E95B22500BA782C /* SampleAppErrors.m */; };
 		D611E3341E95CE4800BA782C /* SampleBaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D611E3331E95CE4800BA782C /* SampleBaseViewController.m */; };
 		D621518B1E9EA65D00B96A7D /* MSAL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D62CF4981E9595CE006C0217 /* MSAL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -117,6 +118,8 @@
 		B221CF0820C4859C002F5E94 /* SampleAppiOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SampleAppiOS.entitlements; sourceTree = "<group>"; };
 		D611E3251E95A5CD00BA782C /* SampleMSALUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleMSALUtil.h; sourceTree = "<group>"; };
 		D611E3261E95A5CD00BA782C /* SampleMSALUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SampleMSALUtil.m; sourceTree = "<group>"; };
+		AA0000000000000000000012 /* SampleExternalIDConfiguration.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SampleExternalIDConfiguration.h; sourceTree = "<group>"; };
+		AA0000000000000000000013 /* SampleExternalIDConfiguration.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SampleExternalIDConfiguration.m; sourceTree = "<group>"; };
 		D611E32F1E95B22500BA782C /* SampleAppErrors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleAppErrors.h; sourceTree = "<group>"; };
 		D611E3301E95B22500BA782C /* SampleAppErrors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SampleAppErrors.m; sourceTree = "<group>"; };
 		D611E3321E95CE4800BA782C /* SampleBaseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleBaseViewController.h; sourceTree = "<group>"; };
@@ -202,6 +205,8 @@
 				D611E3301E95B22500BA782C /* SampleAppErrors.m */,
 				D611E3251E95A5CD00BA782C /* SampleMSALUtil.h */,
 				D611E3261E95A5CD00BA782C /* SampleMSALUtil.m */,
+				AA0000000000000000000012 /* SampleExternalIDConfiguration.h */,
+				AA0000000000000000000013 /* SampleExternalIDConfiguration.m */,
 				D611E3321E95CE4800BA782C /* SampleBaseViewController.h */,
 				D611E3331E95CE4800BA782C /* SampleBaseViewController.m */,
 				D62CF4831E9593FB006C0217 /* SampleLoginViewController.h */,
@@ -381,6 +386,7 @@
 				D6BFE3DF1EB6B0BE00F2B7E8 /* SampleGraphRequest.m in Sources */,
 				D6B58A471EB177E8000B3A5F /* SampleCalendarUtil.m in Sources */,
 				D611E3271E95A5CD00BA782C /* SampleMSALUtil.m in Sources */,
+				AA0000000000000000000011 /* SampleExternalIDConfiguration.m in Sources */,
 				D6AEBD6D1E92DBB300C31082 /* main.m in Sources */,
 				D62CF4821E9593ED006C0217 /* SampleMainViewController.m in Sources */,
 				D611E3311E95B22500BA782C /* SampleAppErrors.m in Sources */,

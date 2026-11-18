@@ -25,10 +25,16 @@
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>msauth.com.microsoft.MSALSampleApp</string>
+				<string>msauth.$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			</array>
 		</dict>
 	</array>
+	<key>ExternalIDClientId</key>
+	<string>REPLACE_WITH_EXTERNAL_ID_APPLICATION_CLIENT_ID</string>
+	<key>ExternalIDAuthority</key>
+	<string>https://&lt;TENANT_SUBDOMAIN&gt;.ciamlogin.com/</string>
+	<key>ExternalIDScopes</key>
+	<array/>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
