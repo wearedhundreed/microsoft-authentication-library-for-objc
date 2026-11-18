@@ -63,7 +63,7 @@ static NSString * const SampleExternalIDScopesKey = @"ExternalIDScopes";
         ![authorityURL.host.uppercaseString containsString:@"TENANT_SUBDOMAIN"] &&
         ![authorityURL.host containsString:@"<"];
     BOOL validRedirect = redirectURL &&
-        [redirectURL.scheme.lowercaseString isEqualToString:@"msauth"] &&
+        [redirectURL.scheme.lowercaseString hasPrefix:@"msauth."] &&
         redirectURL.host.length > 0 &&
         (redirectURL.path.length == 0 || [redirectURL.path.lowercaseString isEqualToString:@"/auth"]) &&
         [self isMSALResponseURL:redirectURL registeredURLSchemes:registeredURLSchemes];
