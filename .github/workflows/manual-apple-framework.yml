@@ -1,0 +1,94 @@
+name: Build MSAL Apple Frameworks
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: manual-apple-framework-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Test and package iOS + macOS
+    runs-on: macos-26
+    timeout-minutes: 90
+    env:
+      IOS_SIM_DEVICE: iPhone 17
+      IOS_SIM_OS: "26.2"
+    steps:
+      - name: Check out repository and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Test iOS framework
+        run: ./build.py --no-xcpretty --targets iosFramework
+
+      - name: Test macOS framework
+        run: ./build.py --no-xcpretty --targets macFramework
+
+      - name: Archive iOS device framework
+        run: >-
+          xcodebuild archive
+          -workspace MSAL.xcworkspace
+          -scheme "MSAL (iOS Framework)"
+          -configuration Release
+          -destination "generic/platform=iOS"
+          -archivePath build/archives/MSAL-iOS.xcarchive
+          SKIP_INSTALL=NO
+          BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+          CODE_SIGNING_ALLOWED=NO
+
+      - name: Archive iOS Simulator framework
+        run: >-
+          xcodebuild archive
+          -workspace MSAL.xcworkspace
+          -scheme "MSAL (iOS Framework)"
+          -configuration Release
+          -destination "generic/platform=iOS Simulator"
+          -archivePath build/archives/MSAL-iOS-Simulator.xcarchive
+          SKIP_INSTALL=NO
+          BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+          CODE_SIGNING_ALLOWED=NO
+
+      - name: Archive macOS framework
+        run: >-
+          xcodebuild archive
+          -workspace MSAL.xcworkspace
+          -scheme "MSAL (Mac Framework)"
+          -configuration Release
+          -destination "generic/platform=macOS"
+          -archivePath build/archives/MSAL-macOS.xcarchive
+          SKIP_INSTALL=NO
+          BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+          CODE_SIGNING_ALLOWED=NO
+
+      - name: Create XCFramework
+        run: |
+          xcodebuild -create-xcframework \
+            -framework build/archives/MSAL-iOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
+            -framework build/archives/MSAL-iOS-Simulator.xcarchive/Products/Library/Frameworks/MSAL.framework \
+            -framework build/archives/MSAL-macOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
+            -output build/release/MSAL.xcframework
+          ditto -c -k --sequesterRsrc --keepParent \
+            build/release/MSAL.xcframework \
+            build/release/MSAL.xcframework.zip
+
+      - name: Upload framework artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MSAL-Apple-XCFramework-${{ github.sha }}
+          path: build/release/MSAL.xcframework.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Show artifact details
+        run: |
+          echo "### MSAL Apple framework build" >> "$GITHUB_STEP_SUMMARY"
+          echo "Commit: `${GITHUB_SHA}`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Branch: `${GITHUB_REF_NAME}`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Artifact: `MSAL-Apple-XCFramework-${GITHUB_SHA}`" >> "$GITHUB_STEP_SUMMARY"
+          shasum -a 256 build/release/MSAL.xcframework.zip >> "$GITHUB_STEP_SUMMARY"
