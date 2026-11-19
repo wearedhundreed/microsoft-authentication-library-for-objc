@@ -948,6 +948,8 @@
 		B27CCDF4229F9F4700CAD565 /* MSALAccountEnumerationParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = B27CCDF1229F9F4700CAD565 /* MSALAccountEnumerationParameters.m */; };
 		B27CCDF5229F9F4700CAD565 /* MSALAccountEnumerationParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = B27CCDF1229F9F4700CAD565 /* MSALAccountEnumerationParameters.m */; };
 		B281B33B226BC225009619AB /* MSALPublicClientApplicationConfigTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B281B33A226BC225009619AB /* MSALPublicClientApplicationConfigTests.m */; };
+		AA0000000000000000000021 /* SampleExternalIDConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000023 /* SampleExternalIDConfiguration.m */; };
+		AA0000000000000000000022 /* SampleExternalIDConfigurationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000024 /* SampleExternalIDConfigurationTests.m */; };
 		B281B33C226BC225009619AB /* MSALPublicClientApplicationConfigTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B281B33A226BC225009619AB /* MSALPublicClientApplicationConfigTests.m */; };
 		B282255C23EF811F0007DFE4 /* MSALB2CInteractiveTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B2F45744211E41C100818910 /* MSALB2CInteractiveTests.m */; };
 		B282255F23EF97C50007DFE4 /* MSALNationalCloudUITest.m in Sources */ = {isa = PBXBuildFile; fileRef = B282255E23EF97C50007DFE4 /* MSALNationalCloudUITest.m */; };
@@ -2683,6 +2685,8 @@
 		B27CCDF0229F9F4700CAD565 /* MSALAccountEnumerationParameters.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALAccountEnumerationParameters.h; sourceTree = "<group>"; };
 		B27CCDF1229F9F4700CAD565 /* MSALAccountEnumerationParameters.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALAccountEnumerationParameters.m; sourceTree = "<group>"; };
 		B281B33A226BC225009619AB /* MSALPublicClientApplicationConfigTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALPublicClientApplicationConfigTests.m; sourceTree = "<group>"; };
+		AA0000000000000000000023 /* SampleExternalIDConfiguration.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ../../../Samples/ios/SampleApp/SampleAppiOS/SampleExternalIDConfiguration.m; sourceTree = "<group>"; };
+		AA0000000000000000000024 /* SampleExternalIDConfigurationTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ../../../Samples/ios/SampleApp/tests/SampleExternalIDConfigurationTests.m; sourceTree = "<group>"; };
 		B282255D23EF97C50007DFE4 /* MSALNationalCloudUITest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSALNationalCloudUITest.h; sourceTree = "<group>"; };
 		B282255E23EF97C50007DFE4 /* MSALNationalCloudUITest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MSALNationalCloudUITest.m; sourceTree = "<group>"; };
 		B282256023EF9BFF0007DFE4 /* MSALChinaCloudUITests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSALChinaCloudUITests.m; sourceTree = "<group>"; };
@@ -4665,6 +4669,8 @@
 				B2725EB422BF2774009B454A /* MSALPublicClientApplicationAccountUpdateTests.m */,
 				B253153A23DD717900432133 /* MSALDeviceInfoProviderTests.m */,
 				C3F28C277941E85614DB60AC /* MSALExternalKeyPairTests.m */,
+				AA0000000000000000000023 /* SampleExternalIDConfiguration.m */,
+				AA0000000000000000000024 /* SampleExternalIDConfigurationTests.m */,
 			);
 			path = unit;
 			sourceTree = "<group>";
@@ -8268,6 +8274,8 @@
 				28A6009B2C7898DA00455666 /* MFADelegatesSpies.swift in Sources */,
 				28FDC4AE2A38D81100E38BE1 /* MSALNativeAuthSignInControllerMock.swift in Sources */,
 				B281B33B226BC225009619AB /* MSALPublicClientApplicationConfigTests.m in Sources */,
+				AA0000000000000000000021 /* SampleExternalIDConfiguration.m in Sources */,
+				AA0000000000000000000022 /* SampleExternalIDConfigurationTests.m in Sources */,
 				E2F5BE9A29896ADB00C67EC7 /* MSALNativeAuthSignInControllerTests.swift in Sources */,
 				9B4EE9D52A1686A900F243C1 /* MSALNativeAuthResetPasswordControllerTests.swift in Sources */,
 				B29A56D52283D7430023F5E6 /* MSALAADAuthorityTests.m in Sources */,

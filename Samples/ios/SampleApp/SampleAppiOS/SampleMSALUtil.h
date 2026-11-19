@@ -74,4 +74,18 @@
                                 parentController:(UIViewController *)controller
                                  completionBlock:(void (^)(NSString *token, NSError *error))acquireTokenBlock;
 
+/*! Starts browser based External ID sign-in using its own client configuration and account state. */
+- (void)signInExternalIDWithParentController:(UIViewController *)controller
+                                 completion:(void (^)(MSALAccount *account, NSError *error))completion;
+
+/*! Removes the External ID account from this app's MSAL token cache. */
+- (void)signOutExternalID;
+
+/*! Acquires External ID scopes silently and falls back only when MSAL requires interaction. */
+- (void)acquireExternalIDTokenWithParentController:(UIViewController *)controller
+                                   completionBlock:(void (^)(NSString *token, NSError *error))completion;
+
+/*! Routes only URLs matching a URL scheme registered by this app to MSAL. */
++ (BOOL)handleMSALResponse:(NSURL *)url sourceApplication:(nullable NSString *)sourceApplication;
+
 @end

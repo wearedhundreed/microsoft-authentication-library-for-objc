@@ -81,6 +81,65 @@
     }];
 }
 
+- (IBAction)signInExternalID:(id)sender
+{
+    [[SampleMSALUtil sharedUtil] signInExternalIDWithParentController:self
+                                                           completion:^(MSALAccount *account, NSError *error)
+    {
+        if (error)
+        {
+            if (![error.domain isEqualToString:MSALErrorDomain] || error.code != MSALErrorUserCanceled)
+            {
+                [self showDialogForError:error];
+            }
+            return;
+        }
+
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"External ID signed in"
+                                                                         message:account.username ?: @"Customer account authenticated."
+                                                                  preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Get token silently"
+                                                  style:UIAlertActionStyleDefault
+                                                handler:^(UIAlertAction *action)
+        {
+            [[SampleMSALUtil sharedUtil] acquireExternalIDTokenWithParentController:self completionBlock:^(NSString *token, NSError *tokenError)
+            {
+                if (tokenError)
+                {
+                    [self showDialogForError:tokenError];
+                }
+                else
+                {
+                    [self showExternalIDSignOutPrompt];
+                }
+            }];
+        }]];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Sign out"
+                                                  style:UIAlertActionStyleDestructive
+                                                handler:^(UIAlertAction *action)
+        {
+            [[SampleMSALUtil sharedUtil] signOutExternalID];
+        }]];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Done" style:UIAlertActionStyleCancel handler:nil]];
+        [self presentViewController:alert animated:YES completion:nil];
+    }];
+}
+
+- (void)showExternalIDSignOutPrompt
+{
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"External ID token acquired"
+                                                                     message:@"MSAL returned a token from its cache. The access token was not displayed or logged."
+                                                              preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Sign out"
+                                              style:UIAlertActionStyleDestructive
+                                            handler:^(UIAlertAction *action)
+    {
+        [[SampleMSALUtil sharedUtil] signOutExternalID];
+    }]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Done" style:UIAlertActionStyleCancel handler:nil]];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
 - (float)startY
 {
     return -1.0f;

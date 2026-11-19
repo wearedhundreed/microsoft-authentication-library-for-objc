@@ -29,12 +29,42 @@
 #import <MSAL/MSALLoggerConfig.h>
 
 #import "SampleMSALUtil.h"
+#import "SampleExternalIDConfiguration.h"
 #import "SampleAppErrors.h"
 #import "SampleCalendarUtil.h"
 #import "SamplePhotoUtil.h"
 
 #define CURRENT_ACCOUNT_KEY @"MSALCurrentAccountIdentifier"
 #define CLIENT_ID @"58391843-2c87-41d1-a457-80b095b7c83f"
+#define EXTERNAL_ID_ACCOUNT_KEY @"MSALExternalIDCurrentAccountIdentifier"
+
+static NSString * const SampleExternalIDScopesKey = @"ExternalIDScopes";
+static NSString * const SampleExternalIDErrorDomain = @"SampleExternalIDConfigurationErrorDomain";
+
+static NSError *SampleExternalIDConfigurationError(NSString *message)
+{
+    return [NSError errorWithDomain:SampleExternalIDErrorDomain
+                               code:1
+                           userInfo:@{NSLocalizedDescriptionKey : message}];
+}
+
+static NSArray<NSString *> *SampleRegisteredURLSchemes(void)
+{
+    NSMutableArray<NSString *> *schemes = [NSMutableArray array];
+    NSArray *urlTypes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleURLTypes"];
+    for (NSDictionary *urlType in urlTypes)
+    {
+        for (NSString *scheme in urlType[@"CFBundleURLSchemes"])
+        {
+            if ([scheme isKindOfClass:NSString.class])
+            {
+                [schemes addObject:scheme];
+            }
+        }
+    }
+
+    return schemes;
+}
 
 @implementation SampleMSALUtil
 
@@ -84,6 +114,151 @@
     // IDs.
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:CLIENT_ID];
     return [[MSALPublicClientApplication alloc] initWithConfiguration:config error:nil];
+}
+
+- (MSALPublicClientApplication *)createExternalIDApplicationWithError:(NSError **)error
+{
+    NSBundle *bundle = [NSBundle mainBundle];
+    NSDictionary<NSString *, id> *configuration = [SampleExternalIDConfiguration validatedConfigurationFromInfoDictionary:bundle.infoDictionary
+                                                                                                           bundleIdentifier:bundle.bundleIdentifier
+                                                                                                       registeredURLSchemes:SampleRegisteredURLSchemes()
+                                                                                                                      error:error];
+    if (!configuration)
+    {
+        return nil;
+    }
+
+    NSError *authorityError = nil;
+    MSALAuthority *authority = [MSALAuthority authorityWithURL:configuration[@"authorityURL"] error:&authorityError];
+    if (!authority)
+    {
+        if (error)
+        {
+            *error = authorityError ?: SampleExternalIDConfigurationError(@"MSAL could not create an authority from the configured External ID URL.");
+        }
+        return nil;
+    }
+
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:configuration[@"clientId"]
+                                                                                                  redirectUri:configuration[@"redirectUri"]
+                                                                                                    authority:authority];
+    return [[MSALPublicClientApplication alloc] initWithConfiguration:config error:error];
+}
+
++ (BOOL)handleMSALResponse:(NSURL *)url sourceApplication:(NSString * _Nullable)sourceApplication
+{
+    if (![SampleExternalIDConfiguration isMSALResponseURL:url registeredURLSchemes:SampleRegisteredURLSchemes()])
+    {
+        return NO;
+    }
+
+    return [MSALPublicClientApplication handleMSALResponse:url sourceApplication:sourceApplication];
+}
+
+- (void)signInExternalIDWithParentController:(UIViewController *)controller
+                                 completion:(void (^)(MSALAccount *account, NSError *error))completion
+{
+    NSError *configurationError = nil;
+    MSALPublicClientApplication *application = [self createExternalIDApplicationWithError:&configurationError];
+    if (!application)
+    {
+        completion(nil, configurationError);
+        return;
+    }
+
+    NSArray<NSString *> *scopes = [[NSBundle mainBundle] objectForInfoDictionaryKey:SampleExternalIDScopesKey];
+    MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:controller];
+    MSALInteractiveTokenParameters *parameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                                      webviewParameters:webParameters];
+    [application acquireTokenWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
+    {
+        if (error)
+        {
+            completion(nil, error);
+            return;
+        }
+
+        if (!result.account.identifier)
+        {
+            completion(nil, SampleExternalIDConfigurationError(@"MSAL did not return an account identifier for the External ID sign-in."));
+            return;
+        }
+
+        [[NSUserDefaults standardUserDefaults] setObject:result.account.identifier forKey:EXTERNAL_ID_ACCOUNT_KEY];
+        completion(result.account, nil);
+    }];
+}
+
+- (void)signOutExternalID
+{
+    NSError *configurationError = nil;
+    MSALPublicClientApplication *application = [self createExternalIDApplicationWithError:&configurationError];
+    NSString *accountIdentifier = [[NSUserDefaults standardUserDefaults] stringForKey:EXTERNAL_ID_ACCOUNT_KEY];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:EXTERNAL_ID_ACCOUNT_KEY];
+    if (!application || !accountIdentifier)
+    {
+        return;
+    }
+
+    NSError *accountError = nil;
+    MSALAccount *account = [application accountForIdentifier:accountIdentifier error:&accountError];
+    if (account)
+    {
+        [application removeAccount:account error:nil];
+    }
+}
+
+- (void)acquireExternalIDTokenWithParentController:(UIViewController *)controller
+                                   completionBlock:(void (^)(NSString *token, NSError *error))completion
+{
+    NSError *configurationError = nil;
+    MSALPublicClientApplication *application = [self createExternalIDApplicationWithError:&configurationError];
+    if (!application)
+    {
+        completion(nil, configurationError);
+        return;
+    }
+
+    NSString *accountIdentifier = [[NSUserDefaults standardUserDefaults] stringForKey:EXTERNAL_ID_ACCOUNT_KEY];
+    if (!accountIdentifier)
+    {
+        completion(nil, SampleExternalIDConfigurationError(@"Sign in with External ID before requesting a token."));
+        return;
+    }
+
+    NSError *accountError = nil;
+    MSALAccount *account = [application accountForIdentifier:accountIdentifier error:&accountError];
+    if (!account)
+    {
+        completion(nil, accountError ?: SampleExternalIDConfigurationError(@"The cached External ID account is no longer available."));
+        return;
+    }
+
+    NSArray<NSString *> *scopes = [[NSBundle mainBundle] objectForInfoDictionaryKey:SampleExternalIDScopesKey];
+    MSALSilentTokenParameters *parameters = [[MSALSilentTokenParameters alloc] initWithScopes:scopes account:account];
+    [application acquireTokenSilentWithParameters:parameters completionBlock:^(MSALResult *result, NSError *error)
+    {
+        if (!error)
+        {
+            completion(result.accessToken, nil);
+            return;
+        }
+
+        if (![error.domain isEqualToString:MSALErrorDomain] || error.code != MSALErrorInteractionRequired)
+        {
+            completion(nil, error);
+            return;
+        }
+
+        MSALWebviewParameters *webParameters = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:controller];
+        MSALInteractiveTokenParameters *interactiveParameters = [[MSALInteractiveTokenParameters alloc] initWithScopes:scopes
+                                                                                                    webviewParameters:webParameters];
+        interactiveParameters.account = account;
+        [application acquireTokenWithParameters:interactiveParameters completionBlock:^(MSALResult *interactiveResult, NSError *interactiveError)
+        {
+            completion(interactiveResult.accessToken, interactiveError);
+        }];
+    }];
 }
 
 - (NSString *)currentAccountIdentifer
