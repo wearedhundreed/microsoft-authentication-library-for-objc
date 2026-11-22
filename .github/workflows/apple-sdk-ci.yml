@@ -1,0 +1,124 @@
+name: Apple SDK CI
+
+on:
+  push:
+    branches:
+      - dev
+      - "feature/**"
+      - "ci/**"
+  pull_request:
+    branches:
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # Serialize push and pull_request runs across refs to prevent shared-runner Xcode overlap.
+  group: apple-sdk-ci-${{ github.workflow }}-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  package-manifest:
+    name: Swift package manifest (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Validate Swift package manifest
+        run: swift package dump-package > /dev/null
+
+      - name: Validate CocoaPods specification syntax
+        run: ruby -c MSAL.podspec
+
+  apple-project:
+    name: Xcode project metadata
+    runs-on: macos-15
+    steps:
+      - name: Check out source and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Validate Xcode project file
+        run: plutil -lint MSAL/MSAL.xcodeproj/project.pbxproj
+
+      - name: Enumerate Xcode schemes
+        run: xcodebuild -list -project MSAL/MSAL.xcodeproj
+
+  apple-build-and-unit-tests:
+    name: Apple platform builds and unit tests
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - name: Check out source and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Show Xcode version and available destinations
+        run: |
+          xcodebuild -version
+          xcrun simctl list devices available
+
+      - name: Build iOS static library
+        run: |
+          xcodebuild build \
+            -project MSAL/MSAL.xcodeproj \
+            -scheme "MSAL (iOS Static Library)" \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData-ios-static" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Build macOS static library
+        run: |
+          xcodebuild build \
+            -project MSAL/MSAL.xcodeproj \
+            -scheme "MSAL (Mac Static Library)" \
+            -destination 'generic/platform=macOS' \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData-macos-static" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Run iOS framework unit tests
+        run: |
+          xcodebuild test \
+            -project MSAL/MSAL.xcodeproj \
+            -scheme "MSAL (iOS Framework)" \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.6' \
+            -parallel-testing-enabled NO \
+            -resultBundlePath "$RUNNER_TEMP/MSAL-iOS.xcresult" \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData-ios-tests" \
+            CODE_SIGNING_ALLOWED=YES \
+            CODE_SIGNING_REQUIRED=YES \
+            CODE_SIGN_IDENTITY=-
+
+      - name: Run macOS framework unit tests
+        if: always()
+        run: |
+          xcodebuild test \
+            -project MSAL/MSAL.xcodeproj \
+            -scheme "MSAL (Mac Framework)" \
+            -destination 'platform=macOS' \
+            -parallel-testing-enabled NO \
+            -resultBundlePath "$RUNNER_TEMP/MSAL-macOS.xcresult" \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData-macos-tests" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload Xcode test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: apple-sdk-xcode-test-results
+          path: |
+            ${{ runner.temp }}/MSAL-iOS.xcresult
+            ${{ runner.temp }}/MSAL-macOS.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
