@@ -88,7 +88,7 @@ jobs:
       - name: Show artifact details
         run: |
           echo "### MSAL Apple framework build" >> "$GITHUB_STEP_SUMMARY"
-          echo "Commit: `${GITHUB_SHA}`" >> "$GITHUB_STEP_SUMMARY"
-          echo "Branch: `${GITHUB_REF_NAME}`" >> "$GITHUB_STEP_SUMMARY"
-          echo "Artifact: `MSAL-Apple-XCFramework-${GITHUB_SHA}`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Commit: \`${GITHUB_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Branch: \`${GITHUB_REF_NAME}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Artifact: \`MSAL-Apple-XCFramework-${GITHUB_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
           shasum -a 256 build/release/MSAL.xcframework.zip >> "$GITHUB_STEP_SUMMARY"
