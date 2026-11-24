@@ -30,9 +30,15 @@ jobs:
 
       - name: Verify and package the unsigned sample
         run: |
-          app="$RUNNER_TEMP/msal-build/Build/Products/Debug-iphoneos/SampleAppiOS.app"
+          settings=$(xcodebuild -showBuildSettings -json \
+            -workspace Samples/ios/SampleApp.xcworkspace \
+            -scheme SampleAppiOS -configuration Debug \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/msal-build" CODE_SIGNING_ALLOWED=NO)
+          app=$(jq -er '.[] | select(.target == "SampleAppiOS") | .buildSettings | .TARGET_BUILD_DIR + "/" + .WRAPPER_NAME' <<< "$settings")
+          executable=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app/Info.plist")
           /usr/libexec/PlistBuddy -c 'Print :CFBundleURLTypes' "$app/Info.plist"
-          xcrun lipo -verify_arch arm64 "$app/SampleAppiOS"
+          xcrun lipo "$app/$executable" -verify_arch arm64
           mkdir -p "$RUNNER_TEMP/msal-package/Payload"
           ditto "$app" "$RUNNER_TEMP/msal-package/Payload/SampleAppiOS.app"
           cd "$RUNNER_TEMP/msal-package"
