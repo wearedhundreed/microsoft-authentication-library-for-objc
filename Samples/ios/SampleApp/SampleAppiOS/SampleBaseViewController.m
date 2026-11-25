@@ -35,24 +35,15 @@
 
 - (void)showDialogForError:(NSError *)error
 {
-    (void)error;
-    // Launching this UIAlert can cause problems if it happens right around the same time some other
-    // UI is trying to launch, and for now is disabled.
-    /*__block UIAlertController *alert =
-    [UIAlertController alertControllerWithTitle:error.localizedDescription
-                                        message:error.localizedFailureReason
-                                 preferredStyle:UIAlertControllerStyleAlert];
-    
-    [alert addAction:[UIAlertAction actionWithTitle:@"OK"
-                                              style:UIAlertActionStyleDefault
-                                            handler:nil]];
-    
-    [self presentViewController:alert
-                       animated:YES
-                     completion:nil];*/
-    
-    NSLog(@"App error: %@", error);
-    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *message = [NSString stringWithFormat:@"%@\n\n%@ (%ld)",
+                             error.localizedDescription, error.domain, (long)error.code];
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Sign-in error"
+                                                                       message:message
+                                                                preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+        [self presentViewController:alert animated:YES completion:nil];
+    });
 }
 
 - (float)startY

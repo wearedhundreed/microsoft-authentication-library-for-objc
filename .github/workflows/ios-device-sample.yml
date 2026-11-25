@@ -3,7 +3,6 @@ name: Build MSAL iPhone Test Sample
 on:
   push:
     branches: [test/msal-iphone-device-build]
-    paths: [.github/workflows/ios-device-sample.yml]
   workflow_dispatch:
 
 permissions:

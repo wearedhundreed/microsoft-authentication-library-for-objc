@@ -109,11 +109,16 @@ static NSArray<NSString *> *SampleRegisteredURLSchemes(void)
 
 - (MSALPublicClientApplication *)createClientApplication
 {
+    return [self createClientApplicationWithError:nil];
+}
+
+- (MSALPublicClientApplication *)createClientApplicationWithError:(NSError **)error
+{
     // This MSALPublicClientApplication object is the representation of your app listing, in MSAL. For your own app
     // go to the Microsoft App Portal to register your own applications with their own client
     // IDs.
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:CLIENT_ID];
-    return [[MSALPublicClientApplication alloc] initWithConfiguration:config error:nil];
+    return [[MSALPublicClientApplication alloc] initWithConfiguration:config error:error];
 }
 
 - (MSALPublicClientApplication *)createExternalIDApplicationWithError:(NSError **)error
@@ -311,7 +316,13 @@ static NSArray<NSString *> *SampleRegisteredURLSchemes(void)
 - (void)signInAccountWithParentController:(UIViewController *)controller
                                completion:(void (^)(MSALAccount *account, NSString *token, NSError *error))signInBlock
 {
-    MSALPublicClientApplication *application = [self createClientApplication];
+    NSError *error = nil;
+    MSALPublicClientApplication *application = [self createClientApplicationWithError:&error];
+    if (!application)
+    {
+        signInBlock(nil, nil, error);
+        return;
+    }
     
     // When signing in an account for the first time we acquire a token without providing
     // an account object. If you've previously asked the user for an email address,
