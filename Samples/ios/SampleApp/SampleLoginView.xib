@@ -28,7 +28,10 @@
                 </button>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" translatesAutoresizingMaskIntoConstraints="NO" id="external-id-sign-in">
                     <rect key="frame" x="72.5" y="375" width="230" height="44"/>
-                    <state key="normal" title="Sign in with External ID"/>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <state key="normal" title="Sign in with External ID">
+                        <color key="titleColor" red="0.02" green="0.22" blue="0.46" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    </state>
                     <connections>
                         <action selector="signInExternalID:" destination="-1" eventType="touchUpInside" id="external-id-sign-in-action"/>
                     </connections>
@@ -40,6 +43,8 @@
                 <constraint firstItem="Kf9-RJ-z60" firstAttribute="centerX" secondItem="Iqr-il-dY4" secondAttribute="centerX" id="hZt-UB-1UR"/>
                 <constraint firstItem="external-id-sign-in" firstAttribute="centerX" secondItem="Iqr-il-dY4" secondAttribute="centerX" id="external-id-center-x"/>
                 <constraint firstItem="external-id-sign-in" firstAttribute="top" secondItem="Kf9-RJ-z60" secondAttribute="bottom" constant="24" id="external-id-below-workforce"/>
+                <constraint firstItem="external-id-sign-in" firstAttribute="width" constant="230" id="external-id-width"/>
+                <constraint firstItem="external-id-sign-in" firstAttribute="height" constant="44" id="external-id-height"/>
             </constraints>
         </view>
     </objects>

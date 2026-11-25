@@ -83,9 +83,15 @@
 
 - (IBAction)signInExternalID:(id)sender
 {
+    UIButton *button = sender;
+    button.enabled = NO;
+    [button setTitle:@"Opening sign-in…" forState:UIControlStateDisabled];
     [[SampleMSALUtil sharedUtil] signInExternalIDWithParentController:self
                                                            completion:^(MSALAccount *account, NSError *error)
     {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            button.enabled = YES;
+        });
         if (error)
         {
             if (![error.domain isEqualToString:MSALErrorDomain] || error.code != MSALErrorUserCanceled)
