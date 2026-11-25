@@ -32,6 +32,7 @@
 #import "SampleAppDelegate.h"
 #import "SampleAppErrors.h"
 #import "SampleCalendarUtil.h"
+#import "SampleGraphRequest.h"
 #import "SampleLoginViewController.h"
 #import "SampleMSALUtil.h"
 #import "SamplePhotoUtil.h"
@@ -93,6 +94,56 @@
     [super viewDidLoad];
     
     _tableView.dataSource = self;
+    UIButton *mailbox = [UIButton buttonWithType:UIButtonTypeSystem];
+    mailbox.frame = CGRectMake(0, 0, CGRectGetWidth(_tableView.bounds), 48);
+    [mailbox setTitle:@"Open Microsoft inbox" forState:UIControlStateNormal];
+    [mailbox addTarget:self action:@selector(openMailbox:) forControlEvents:UIControlEventTouchUpInside];
+    _tableView.tableHeaderView = mailbox;
+}
+
+- (void)openMailbox:(UIButton *)button
+{
+    button.enabled = NO;
+    [[SampleMSALUtil sharedUtil] acquireTokenForCurrentAccount:@[@"https://graph.microsoft.com/Mail.ReadBasic"]
+                                             parentController:self
+                                              completionBlock:^(NSString *token, NSError *error)
+    {
+        if (error)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                button.enabled = YES;
+                if (![error.domain isEqualToString:MSALErrorDomain] || error.code != MSALErrorUserCanceled)
+                {
+                    [self showDialogForError:error];
+                }
+            });
+            return;
+        }
+        [[SampleGraphRequest v1RequestWithToken:token] getJSON:@"me/mailFolders/inbox/messages?$top=5&$select=subject"
+                                            completionHandler:^(NSDictionary *json, NSError *mailError)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                button.enabled = YES;
+                if (mailError)
+                {
+                    [self showDialogForError:mailError];
+                    return;
+                }
+                NSMutableArray<NSString *> *subjects = [NSMutableArray new];
+                for (NSDictionary *message in json[@"value"])
+                {
+                    NSString *subject = message[@"subject"];
+                    [subjects addObject:[subject isKindOfClass:[NSString class]] && subject.length ? subject : @"(No subject)"];
+                }
+                NSString *summary = subjects.count ? [subjects componentsJoinedByString:@"\n\n"] : @"No messages found.";
+                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Microsoft inbox"
+                                                                               message:summary
+                                                                        preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:@"Done" style:UIAlertActionStyleDefault handler:nil]];
+                [self presentViewController:alert animated:YES completion:nil];
+            });
+        }];
+    }];
 }
 
 - (void)viewWillAppear:(BOOL)animated

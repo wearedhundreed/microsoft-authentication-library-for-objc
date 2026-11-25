@@ -34,6 +34,7 @@ extern const NSErrorDomain SampleGraphErrorDomain;
 @interface SampleGraphRequest : NSObject
 
 + (instancetype)requestWithToken:(NSString *)token;
++ (instancetype)v1RequestWithToken:(NSString *)token;
 
 - (void)getJSON:(NSString *)path completionHandler:(void(^)(NSDictionary *json, NSError *error))completionBlock;
 - (void)getData:(NSString *)path completionHandler:(void (^)(NSData *, NSError *))completionBlock;

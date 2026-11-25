@@ -117,8 +117,14 @@ static NSArray<NSString *> *SampleRegisteredURLSchemes(void)
     // This MSALPublicClientApplication object is the representation of your app listing, in MSAL. For your own app
     // go to the Microsoft App Portal to register your own applications with their own client
     // IDs.
-    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:CLIENT_ID];
-    NSString *redirectUri = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"WorkforceRedirectUri"];
+    NSBundle *bundle = [NSBundle mainBundle];
+    NSString *clientId = [bundle objectForInfoDictionaryKey:@"WorkforceClientId"];
+    if (![clientId isKindOfClass:[NSString class]] || !clientId.length)
+    {
+        clientId = CLIENT_ID;
+    }
+    MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:clientId];
+    NSString *redirectUri = [bundle objectForInfoDictionaryKey:@"WorkforceRedirectUri"];
     if ([redirectUri isKindOfClass:[NSString class]] && redirectUri.length)
     {
         config.redirectUri = redirectUri;

@@ -32,11 +32,12 @@ const NSErrorDomain SampleGraphErrorDomain = (NSErrorDomain)(@"SampleGraphErrorD
 @implementation SampleGraphRequest
 {
     NSString *_token;
+    NSString *_version;
 }
 
-+ (NSURL *)graphURLWithPath:(NSString *)path
+- (NSURL *)graphURLWithPath:(NSString *)path
 {
-    NSString *urlString = [NSString stringWithFormat:@"https://graph.microsoft.com/beta/%@", path];
+    NSString *urlString = [NSString stringWithFormat:@"https://graph.microsoft.com/%@/%@", _version, path];
     return [NSURL URLWithString:urlString];
 }
 
@@ -44,13 +45,21 @@ const NSErrorDomain SampleGraphErrorDomain = (NSErrorDomain)(@"SampleGraphErrorD
 {
     SampleGraphRequest *req = [self new];
     req->_token = token;
+    req->_version = @"beta";
     return req;
+}
+
++ (instancetype)v1RequestWithToken:(NSString *)token
+{
+    SampleGraphRequest *request = [self requestWithToken:token];
+    request->_version = @"v1.0";
+    return request;
 }
 
 - (void)getData:(NSString *)path completionHandler:(void (^)(NSData *, NSError *))completionBlock
 {
     NSMutableURLRequest *urlRequest = [NSMutableURLRequest new];
-    urlRequest.URL = [SampleGraphRequest graphURLWithPath:path];
+    urlRequest.URL = [self graphURLWithPath:path];
     urlRequest.HTTPMethod = @"GET";
     urlRequest.allHTTPHeaderFields = @{ @"Authorization" : [NSString stringWithFormat:@"Bearer %@", _token] };
     
