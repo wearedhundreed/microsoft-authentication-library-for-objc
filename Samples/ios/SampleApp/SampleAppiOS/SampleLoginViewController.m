@@ -33,6 +33,81 @@
 #import "SampleMSALUtil.h"
 #import "SampleMainViewController.h"
 
+@interface SampleExternalIDSignedInViewController : SampleBaseViewController
+
+@property (nonatomic, copy) NSString *username;
+@property (nonatomic, strong) UILabel *statusLabel;
+
+@end
+
+@implementation SampleExternalIDSignedInViewController
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    self.view.backgroundColor = UIColor.systemBackgroundColor;
+
+    UILabel *heading = [UILabel new];
+    heading.text = @"External ID signed in";
+    heading.font = [UIFont preferredFontForTextStyle:UIFontTextStyleTitle1];
+    heading.numberOfLines = 0;
+
+    UILabel *account = [UILabel new];
+    account.text = self.username;
+    account.numberOfLines = 0;
+
+    self.statusLabel = [UILabel new];
+    self.statusLabel.numberOfLines = 0;
+
+    UIButton *getToken = [UIButton buttonWithType:UIButtonTypeSystem];
+    [getToken setTitle:@"Get token" forState:UIControlStateNormal];
+    [getToken addTarget:self action:@selector(getToken:) forControlEvents:UIControlEventTouchUpInside];
+
+    UIButton *signOut = [UIButton buttonWithType:UIButtonTypeSystem];
+    [signOut setTitle:@"Sign out" forState:UIControlStateNormal];
+    [signOut addTarget:self action:@selector(signOut) forControlEvents:UIControlEventTouchUpInside];
+
+    UIStackView *stack = [[UIStackView alloc] initWithArrangedSubviews:@[heading, account, self.statusLabel, getToken, signOut]];
+    stack.axis = UILayoutConstraintAxisVertical;
+    stack.spacing = 16;
+    stack.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:stack];
+    UILayoutGuide *guide = self.view.safeAreaLayoutGuide;
+    [NSLayoutConstraint activateConstraints:@[
+        [stack.leadingAnchor constraintEqualToAnchor:guide.leadingAnchor constant:24],
+        [stack.trailingAnchor constraintEqualToAnchor:guide.trailingAnchor constant:-24],
+        [stack.centerYAnchor constraintEqualToAnchor:guide.centerYAnchor],
+        [getToken.heightAnchor constraintGreaterThanOrEqualToConstant:44],
+        [signOut.heightAnchor constraintGreaterThanOrEqualToConstant:44]
+    ]];
+}
+
+- (void)getToken:(UIButton *)button
+{
+    button.enabled = NO;
+    self.statusLabel.text = @"Requesting token…";
+    [[SampleMSALUtil sharedUtil] acquireExternalIDTokenWithParentController:self
+                                                          completionBlock:^(NSString *token, NSError *error)
+    {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            button.enabled = YES;
+            self.statusLabel.text = token.length ? @"Token acquired." : @"Token unavailable.";
+            if (error)
+            {
+                [self showDialogForError:error];
+            }
+        });
+    }];
+}
+
+- (void)signOut
+{
+    [[SampleMSALUtil sharedUtil] signOutExternalID];
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+@end
+
 @interface SampleLoginViewController ()
 
 @end
@@ -101,49 +176,13 @@
             return;
         }
 
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"External ID signed in"
-                                                                         message:account.username ?: @"Customer account authenticated."
-                                                                  preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Get token silently"
-                                                  style:UIAlertActionStyleDefault
-                                                handler:^(UIAlertAction *action)
-        {
-            [[SampleMSALUtil sharedUtil] acquireExternalIDTokenWithParentController:self completionBlock:^(NSString *token, NSError *tokenError)
-            {
-                if (tokenError)
-                {
-                    [self showDialogForError:tokenError];
-                }
-                else
-                {
-                    [self showExternalIDSignOutPrompt];
-                }
-            }];
-        }]];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Sign out"
-                                                  style:UIAlertActionStyleDestructive
-                                                handler:^(UIAlertAction *action)
-        {
-            [[SampleMSALUtil sharedUtil] signOutExternalID];
-        }]];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Done" style:UIAlertActionStyleCancel handler:nil]];
-        [self presentViewController:alert animated:YES completion:nil];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            SampleExternalIDSignedInViewController *screen = [SampleExternalIDSignedInViewController new];
+            screen.username = account.username ?: @"Customer account authenticated.";
+            screen.modalPresentationStyle = UIModalPresentationFullScreen;
+            [self presentViewController:screen animated:YES completion:nil];
+        });
     }];
-}
-
-- (void)showExternalIDSignOutPrompt
-{
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"External ID token acquired"
-                                                                     message:@"MSAL returned a token from its cache. The access token was not displayed or logged."
-                                                              preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:@"Sign out"
-                                              style:UIAlertActionStyleDestructive
-                                            handler:^(UIAlertAction *action)
-    {
-        [[SampleMSALUtil sharedUtil] signOutExternalID];
-    }]];
-    [alert addAction:[UIAlertAction actionWithTitle:@"Done" style:UIAlertActionStyleCancel handler:nil]];
-    [self presentViewController:alert animated:YES completion:nil];
 }
 
 - (float)startY

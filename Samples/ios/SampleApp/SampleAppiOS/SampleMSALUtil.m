@@ -118,6 +118,11 @@ static NSArray<NSString *> *SampleRegisteredURLSchemes(void)
     // go to the Microsoft App Portal to register your own applications with their own client
     // IDs.
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:CLIENT_ID];
+    NSString *redirectUri = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"WorkforceRedirectUri"];
+    if ([redirectUri isKindOfClass:[NSString class]] && redirectUri.length)
+    {
+        config.redirectUri = redirectUri;
+    }
     if ([[[NSBundle mainBundle] objectForInfoDictionaryKey:@"UsePrivateMSALCache"] boolValue])
     {
         config.cacheConfig.keychainSharingGroup = [NSBundle mainBundle].bundleIdentifier;
