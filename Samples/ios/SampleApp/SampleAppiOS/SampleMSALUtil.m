@@ -118,6 +118,10 @@ static NSArray<NSString *> *SampleRegisteredURLSchemes(void)
     // go to the Microsoft App Portal to register your own applications with their own client
     // IDs.
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:CLIENT_ID];
+    if ([[[NSBundle mainBundle] objectForInfoDictionaryKey:@"UsePrivateMSALCache"] boolValue])
+    {
+        config.cacheConfig.keychainSharingGroup = [NSBundle mainBundle].bundleIdentifier;
+    }
     return [[MSALPublicClientApplication alloc] initWithConfiguration:config error:error];
 }
 
@@ -147,6 +151,10 @@ static NSArray<NSString *> *SampleRegisteredURLSchemes(void)
     MSALPublicClientApplicationConfig *config = [[MSALPublicClientApplicationConfig alloc] initWithClientId:configuration[@"clientId"]
                                                                                                   redirectUri:configuration[@"redirectUri"]
                                                                                                     authority:authority];
+    if ([[bundle objectForInfoDictionaryKey:@"UsePrivateMSALCache"] boolValue])
+    {
+        config.cacheConfig.keychainSharingGroup = bundle.bundleIdentifier;
+    }
     return [[MSALPublicClientApplication alloc] initWithConfiguration:config error:error];
 }
 

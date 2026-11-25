@@ -36,6 +36,7 @@ jobs:
             -derivedDataPath "$RUNNER_TEMP/msal-build" CODE_SIGNING_ALLOWED=NO)
           app=$(jq -er '.[] | select(.target == "SampleAppiOS") | .buildSettings | .TARGET_BUILD_DIR + "/" + .WRAPPER_NAME' <<< "$settings")
           executable=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app/Info.plist")
+          plutil -insert UsePrivateMSALCache -bool YES "$app/Info.plist"
           /usr/libexec/PlistBuddy -c 'Print :CFBundleURLTypes' "$app/Info.plist"
           xcrun lipo "$app/$executable" -verify_arch arm64
           mkdir -p "$RUNNER_TEMP/msal-package/Payload"

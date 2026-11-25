@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "SampleBaseViewController.h"
+#import <MSAL/MSAL.h>
 
 @interface SampleBaseViewController ()
 
@@ -38,6 +39,11 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         NSString *message = [NSString stringWithFormat:@"%@\n\n%@ (%ld)",
                              error.localizedDescription, error.domain, (long)error.code];
+        NSNumber *internalCode = error.userInfo[MSALInternalErrorCodeKey];
+        if ([error.domain isEqualToString:MSALErrorDomain] && [internalCode isKindOfClass:[NSNumber class]])
+        {
+            message = [message stringByAppendingFormat:@"\nMSAL internal code: %@", internalCode];
+        }
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Sign-in error"
                                                                        message:message
                                                                 preferredStyle:UIAlertControllerStyleAlert];
