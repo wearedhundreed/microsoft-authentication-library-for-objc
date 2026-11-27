@@ -2,6 +2,8 @@
 
 The Objective-C sample now has a second, independent Microsoft Entra External ID browser sign-in path. The existing workforce client ID, account key, and sign-in path remain in place. Both flows use MSAL public-client APIs; the sample does not implement a parallel OAuth flow.
 
+For a staging sign-in option through WorkOS AuthKit, see [WorkOS federation setup](WORKOS_AUTHKIT_ENTRA_EXTERNAL_ID.md).
+
 ## Scope and security model
 
 - The app is a native **public client**. Do not embed a client secret or private key.
